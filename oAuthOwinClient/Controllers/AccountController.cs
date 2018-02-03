@@ -100,7 +100,7 @@ namespace oAuthOidcOwinClient.Controllers
         {
             //Grab certificate for verifying JWT signature
             //In prod, we'd get this from the certificate store or similar
-            var certPath = Path.Combine(Server.MapPath("~/bin"), "SscSign.pfx");
+            var certPath = Path.Combine(Server.MapPath("~/bin"), "TestSign.cer");
             var cert = new X509Certificate2(certPath);
             var x509SecurityKey = new X509SecurityKey(cert);
 

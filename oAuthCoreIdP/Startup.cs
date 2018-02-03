@@ -20,8 +20,8 @@ namespace oAuthCoreIdP
         {
             //Grab key for verifying JWT signature
             //In prod, we'd get this from the certificate store or similar
-            var certPath = Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "SscSign.pfx");
-            var cert = new X509Certificate2(certPath); 
+            var certPath = Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "TestSign.pfx");
+            var cert = new X509Certificate2(certPath, "111111"); 
 
             // configure identity server with in-memory stores, keys, clients and scopes
             services.AddDeveloperIdentityServer(options =>
