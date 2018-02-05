@@ -13,9 +13,28 @@ namespace oAuthCoreIdP
             var secret = new Secret { Value = "mysecret".Sha512() };
 
             return new List<Client> {
+                new Client {                    
+                    ClientId = "mf",
+                    ClientName = "Authorization Code Client",
+                    ClientSecrets = new List<Secret>{ new Secret { Value = "Ywv14txfGNajhsd7Vues48H0R" } }, // { secret },
+                    Enabled = true,
+                    AllowedGrantTypes = new List<string> { "authorization_code" }, //DELTA //IdentityServer3 wanted Flow = Flows.AuthorizationCode,
+                    RequireConsent = true,
+                    AllowRememberConsent = false,
+                    RedirectUris =
+                      new List<string> {
+                           "http://test.dbworld.cn/authentication/MFiles.AuthenticationProviders.OAuth/read"
+                      },
+                    PostLogoutRedirectUris =
+                      new List<string> {"http://test.dbworld.cn/"},
+                    AllowedScopes = new List<string> {
+                        "api"
+                    },
+                    AccessTokenType = AccessTokenType.Jwt
+                },
                 new Client {
                     ClientId = "authorizationCodeClient2",
-                    ClientName = "Authorization Code Client",
+                    ClientName = "Authorization Code Client2",
                     ClientSecrets = new List<Secret> { secret },
                     Enabled = true,
                     AllowedGrantTypes = new List<string> { "authorization_code" }, //DELTA //IdentityServer3 wanted Flow = Flows.AuthorizationCode,

@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Security.Claims;
 
 namespace oAuthCoreIdP
 {
@@ -18,6 +18,8 @@ namespace oAuthCoreIdP
                     DisplayName = "api scope",
                     Type = ScopeType.Resource,
                     Emphasize = false,
+                    //https://github.com/IdentityServer/IdentityServer3/issues/1784
+                    Claims = new List<ScopeClaim>{ new ScopeClaim(ClaimTypes.NameIdentifier, alwaysInclude: true) }
                 }
             };
         }

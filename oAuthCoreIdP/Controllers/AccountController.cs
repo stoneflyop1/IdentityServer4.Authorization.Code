@@ -91,7 +91,9 @@ namespace IdentityServer4.Quickstart.UI.Controllers
                         };
                     };
 
-                    await HttpContext.Authentication.SignInAsync(user.Subject, user.Username, props);
+                    var claim = new Claim(ClaimTypes.NameIdentifier, user.Username);
+
+                    await HttpContext.Authentication.SignInAsync(user.Subject, user.Username, props, claim);
                     
                     // make sure the returnUrl is still valid, and if yes - redirect back to authorize endpoint
                     if (_interaction.IsValidReturnUrl(model.ReturnUrl))
@@ -263,7 +265,7 @@ namespace IdentityServer4.Quickstart.UI.Controllers
             }
 
             var additionalClaims = new List<Claim>();
-
+            additionalClaims.Add(new Claim(ClaimTypes.Name, user.Username));
             // if the external system sent a session id claim, copy it over
             var sid = claims.FirstOrDefault(x => x.Type == JwtClaimTypes.SessionId);
             if (sid != null)

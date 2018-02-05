@@ -11,9 +11,18 @@ using IdentityServer4.Configuration;
 using Microsoft.Extensions.PlatformAbstractions;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
+using IdentityServer4.Validation;
+using IdentityServer4.Models;
 
 namespace oAuthCoreIdP
 {
+    public class SecretValidator : ISecretValidator
+    {
+        public Task<SecretValidationResult> ValidateAsync(IEnumerable<Secret> secrets, ParsedSecret parsedSecret)
+        {
+            return Task.FromResult(new SecretValidationResult() { Success = true });
+        }
+    }
     public class Startup
     {
         public void ConfigureServices(IServiceCollection services)
@@ -26,12 +35,12 @@ namespace oAuthCoreIdP
             // configure identity server with in-memory stores, keys, clients and scopes
             services.AddDeveloperIdentityServer(options =>
                 {
-                    options.IssuerUri = "SomeSecureCompany";
+                    options.IssuerUri = "http://localhost:5000";
                 })
                 .AddInMemoryScopes(Scopes.Get())
                 .AddInMemoryClients(Clients.Get())
                 .AddInMemoryUsers(Users.Get())
-                .SetSigningCredential(cert);
+                .SetSigningCredential(cert).AddSecretValidator<SecretValidator>();
 
             services.AddMvc();
         }
