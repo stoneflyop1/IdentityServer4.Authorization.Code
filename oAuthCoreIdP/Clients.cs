@@ -1,4 +1,5 @@
 ﻿
+using IdentityServer4;
 using IdentityServer4.Models;
 using System;
 using System.Collections.Generic;
@@ -49,7 +50,7 @@ namespace oAuthCoreIdP
                       new List<string> {"http://localhost:5436"},
                     AllowedScopes = new List<string> {
                         "api"
-                    },
+                    }, EnableLocalLogin = true, 
                     AccessTokenType = AccessTokenType.Jwt
                 }
             };

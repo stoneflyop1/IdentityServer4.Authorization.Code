@@ -9,19 +9,45 @@ namespace oAuthCoreIdP
     public class Scopes
     {
         // scopes define the resources in your system
-        public static IEnumerable<Scope> Get()
+        public static IEnumerable<IdentityResource> Get()
         {
-            return new List<Scope> {
-                new Scope
+            return new List<IdentityResource> {
+                new IdentityResource()
                 {
                     Name = "api",
                     DisplayName = "api scope",
-                    Type = ScopeType.Resource,
+                    Required = true, 
+                    //Type = ScopeType.Resource,
                     Emphasize = false,
                     //https://github.com/IdentityServer/IdentityServer3/issues/1784
-                    Claims = new List<ScopeClaim>{ new ScopeClaim(ClaimTypes.NameIdentifier, alwaysInclude: true) }
+                    UserClaims = new List<string> { ClaimTypes.NameIdentifier }
                 }
             };
         }
+
+        public static IEnumerable<ApiResource> GetApi()
+        {
+            return new List<ApiResource> {
+                new ApiResource()
+                {                    
+                    Name = "api",
+                    DisplayName = "api scope",
+                    //https://github.com/IdentityServer/IdentityServer3/issues/1784
+                    UserClaims = new List<string> { ClaimTypes.NameIdentifier }, Enabled = true,
+                    Scopes = new List<Scope>
+                    {
+                        new Scope
+                        {
+                            Name = "api",
+                            DisplayName = "api scope", Required = true,
+                            Emphasize = false,
+                            //https://github.com/IdentityServer/IdentityServer3/issues/1784
+                            UserClaims = new List<string>{ ClaimTypes.NameIdentifier }
+                        }
+                    }
+                }
+            };
+        }
+
     }
 }

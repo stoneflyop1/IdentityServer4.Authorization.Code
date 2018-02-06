@@ -1,5 +1,6 @@
 ﻿
-using IdentityServer4.Services.InMemory;
+using IdentityServer4.Test;
+using oAuthCoreIdP.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,24 @@ namespace oAuthCoreIdP
                     Subject = "1",
                     Username = "admin",
                     Password = "pass123",
+                    Claims = new List<Claim> {
+                        new Claim(ClaimTypes.NameIdentifier, "admin"), //AccountClaim
+                        new Claim(ClaimTypes.GivenName, "GivenName"),
+                        new Claim(ClaimTypes.Surname, "surname"), //DELTA //.FamilyName in IdentityServer3
+                        new Claim(ClaimTypes.Email, "user@somesecurecompany.com"),
+                        new Claim(ClaimTypes.Role, "Badmin")
+                    }
+                }
+            };
+        }
+
+        public static List<TestUser> GetTest()
+        {
+            return new List<TestUser> {
+                new TestUser {
+                    Username = "admin",
+                    Password = "pass123",
+                    SubjectId = "1",
                     Claims = new List<Claim> {
                         new Claim(ClaimTypes.NameIdentifier, "admin"), //AccountClaim
                         new Claim(ClaimTypes.GivenName, "GivenName"),

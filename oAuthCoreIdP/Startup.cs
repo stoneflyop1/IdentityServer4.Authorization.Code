@@ -13,6 +13,7 @@ using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using IdentityServer4.Validation;
 using IdentityServer4.Models;
+using IdentityServer4;
 
 namespace oAuthCoreIdP
 {
@@ -25,6 +26,8 @@ namespace oAuthCoreIdP
     }
     public class Startup
     {
+        public static readonly string AuthScheme = IdentityServerConstants.DefaultCookieAuthenticationScheme; //"bearer";
+
         public void ConfigureServices(IServiceCollection services)
         {
             //Grab key for verifying JWT signature
@@ -33,14 +36,16 @@ namespace oAuthCoreIdP
             var cert = new X509Certificate2(certPath, "111111"); 
 
             // configure identity server with in-memory stores, keys, clients and scopes
-            services.AddDeveloperIdentityServer(options =>
+            services.AddIdentityServer(options => //.AddDeveloperIdentityServer
                 {
                     options.IssuerUri = "http://localhost:5000";
-                })
-                .AddInMemoryScopes(Scopes.Get())
-                .AddInMemoryClients(Clients.Get())
-                .AddInMemoryUsers(Users.Get())
-                .SetSigningCredential(cert).AddSecretValidator<SecretValidator>();
+                    //options.Authentication.AuthenticationScheme = AuthScheme;
+                }) //.AddInMemoryIdentityResources(Scopes.Get())
+                .AddInMemoryApiResources(Scopes.GetApi())//.AddInMemoryScopes(Scopes.Get())
+                .AddInMemoryClients(Clients.Get()).AddTestUsers(Users.GetTest())
+                //.AddInMemoryUsers(Users.Get())
+                .AddSigningCredential(cert) //.SetSigningCredential(cert)
+                .AddSecretValidator<SecretValidator>();
 
             services.AddMvc();
         }

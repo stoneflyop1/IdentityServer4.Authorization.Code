@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using IdentityServer4.Models;
 using IdentityServer4.Stores;
 using IdentityServer4.Quickstart.UI.Models;
+using oAuthCoreIdP;
 
 namespace IdentityServer4.Quickstart.UI.Controllers
 {
@@ -20,19 +21,20 @@ namespace IdentityServer4.Quickstart.UI.Controllers
     {
         private readonly ILogger<ConsentController> _logger;
         private readonly IClientStore _clientStore;
-        private readonly IScopeStore _scopeStore;
+        //private readonly IScopeStore _scopeStore;
         private readonly IIdentityServerInteractionService _interaction;
         
         public ConsentController(
             ILogger<ConsentController> logger,
             IIdentityServerInteractionService interaction,
-            IClientStore clientStore,
-            IScopeStore scopeStore)
+            IClientStore clientStore
+            //,IScopeStore scopeStore
+            )
         {
             _logger = logger;
             _interaction = interaction;
             _clientStore = clientStore;
-            _scopeStore = scopeStore;
+            //_scopeStore = scopeStore;
         }
 
         /// <summary>
@@ -116,7 +118,8 @@ namespace IdentityServer4.Quickstart.UI.Controllers
                 var client = await _clientStore.FindEnabledClientByIdAsync(request.ClientId);
                 if (client != null)
                 {
-                    var scopes = await _scopeStore.FindEnabledScopesAsync(request.ScopesRequested);
+
+                    var scopes = Scopes.Get().Where(c => request.ScopesRequested.Contains(c.Name));//await _scopeStore.FindEnabledScopesAsync(request.ScopesRequested);
                     if (scopes != null && scopes.Any())
                     {
                         return new ConsentViewModel(model, returnUrl, request, client, scopes);

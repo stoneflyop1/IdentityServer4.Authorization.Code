@@ -5,7 +5,6 @@
 using IdentityModel;
 using IdentityServer4.Quickstart.UI.Models;
 using IdentityServer4.Services;
-using IdentityServer4.Services.InMemory;
 using Microsoft.AspNetCore.Http.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -16,6 +15,9 @@ using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using IdentityServer4.Models;
 using IdentityServer4.Stores;
+using oAuthCoreIdP.Services;
+using IdentityServer4.Test;
+using oAuthCoreIdP;
 
 namespace IdentityServer4.Quickstart.UI.Controllers
 {
@@ -26,12 +28,12 @@ namespace IdentityServer4.Quickstart.UI.Controllers
     /// </summary>
     public class AccountController : Controller
     {
-        private readonly InMemoryUserLoginService _loginService;
+        private readonly TestUserStore _loginService;
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IClientStore _clientStore;
 
         public AccountController(
-            InMemoryUserLoginService loginService,
+            TestUserStore loginService,
             IIdentityServerInteractionService interaction,
             IClientStore clientStore)
         {
@@ -92,9 +94,13 @@ namespace IdentityServer4.Quickstart.UI.Controllers
                     };
 
                     var claim = new Claim(ClaimTypes.NameIdentifier, user.Username);
+                    var sub = new Claim("sub", user.SubjectId);
+                    var name = new Claim(ClaimTypes.Name, user.Username);
 
-                    await HttpContext.Authentication.SignInAsync(user.Subject, user.Username, props, claim);
-                    
+                    //var identity = new ClaimsIdentity(new[] { claim, sub, name, new Claim("name", user.Username) });
+
+                    await HttpContext.Authentication.SignInAsync(user.SubjectId, user.Username, props, new Claim[] { claim, sub, name, new Claim("name", user.Username) }); //(Startup.AuthScheme, new ClaimsPrincipal(identity), props);
+
                     // make sure the returnUrl is still valid, and if yes - redirect back to authorize endpoint
                     if (_interaction.IsValidReturnUrl(model.ReturnUrl))
                     {
@@ -162,11 +168,11 @@ namespace IdentityServer4.Quickstart.UI.Controllers
         public async Task<IActionResult> Logout(string logoutId)
         {
             var context = await _interaction.GetLogoutContextAsync(logoutId);
-            if (context?.IsAuthenticatedLogout == true)
-            {
+            //if (context?.IsAuthenticatedLogout == true)
+            //{
                 // if the logout request is authenticated, it's safe to automatically sign-out
                 return await Logout(new LogoutViewModel { LogoutId = logoutId });
-            }
+            //}
 
             var vm = new LogoutViewModel
             {
@@ -266,6 +272,7 @@ namespace IdentityServer4.Quickstart.UI.Controllers
 
             var additionalClaims = new List<Claim>();
             additionalClaims.Add(new Claim(ClaimTypes.Name, user.Username));
+            additionalClaims.Add(new Claim("sub", user.SubjectId));
             // if the external system sent a session id claim, copy it over
             var sid = claims.FirstOrDefault(x => x.Type == JwtClaimTypes.SessionId);
             if (sid != null)
@@ -273,8 +280,10 @@ namespace IdentityServer4.Quickstart.UI.Controllers
                 additionalClaims.Add(new Claim(JwtClaimTypes.SessionId, sid.Value));
             }
 
+            var identity = new ClaimsIdentity(additionalClaims);
+
             // issue authentication cookie for user
-            await HttpContext.Authentication.SignInAsync(user.Subject, user.Username, provider, additionalClaims.ToArray());
+            await HttpContext.Authentication.SignInAsync(Startup.AuthScheme, new ClaimsPrincipal(identity));
 
             // delete temporary cookie used during external authentication
             await HttpContext.Authentication.SignOutAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme);

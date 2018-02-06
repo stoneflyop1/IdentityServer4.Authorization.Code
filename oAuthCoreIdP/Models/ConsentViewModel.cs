@@ -10,7 +10,7 @@ namespace IdentityServer4.Quickstart.UI.Models
 {
     public class ConsentViewModel : ConsentInputModel
     {
-        public ConsentViewModel(ConsentInputModel model, string returnUrl, AuthorizationRequest request, Client client, IEnumerable<Scope> scopes)
+        public ConsentViewModel(ConsentInputModel model, string returnUrl, AuthorizationRequest request, Client client, IEnumerable<IdentityResource> scopes)
         {
             RememberConsent = model?.RememberConsent ?? true;
             ScopesConsented = model?.ScopesConsented ?? Enumerable.Empty<string>();
@@ -22,8 +22,10 @@ namespace IdentityServer4.Quickstart.UI.Models
             ClientLogoUrl = client.LogoUri;
             AllowRememberConsent = client.AllowRememberConsent;
 
-            IdentityScopes = scopes.Where(x => x.Type == ScopeType.Identity).Select(x => new ScopeViewModel(x, ScopesConsented.Contains(x.Name) || model == null)).ToArray();
-            ResourceScopes = scopes.Where(x => x.Type == ScopeType.Resource).Select(x => new ScopeViewModel(x, ScopesConsented.Contains(x.Name) || model == null)).ToArray();
+            //IdentityScopes = scopes.Where(x => x.Type == ScopeType.Identity).Select(x => new ScopeViewModel(x, ScopesConsented.Contains(x.Name) || model == null)).ToArray();
+            //ResourceScopes = scopes.Where(x => x.Type == ScopeType.Resource).Select(x => new ScopeViewModel(x, ScopesConsented.Contains(x.Name) || model == null)).ToArray();
+
+            Scopes = scopes.Select(x => new ScopeViewModel(x, ScopesConsented.Contains(x.Name) || model == null)).ToArray();
         }
 
         public string ClientName { get; set; }
@@ -31,13 +33,15 @@ namespace IdentityServer4.Quickstart.UI.Models
         public string ClientLogoUrl { get; set; }
         public bool AllowRememberConsent { get; set; }
 
-        public IEnumerable<ScopeViewModel> IdentityScopes { get; set; }
-        public IEnumerable<ScopeViewModel> ResourceScopes { get; set; }
+        //public IEnumerable<ScopeViewModel> IdentityScopes { get; set; }
+        //public IEnumerable<ScopeViewModel> ResourceScopes { get; set; }
+
+        public IEnumerable<ScopeViewModel> Scopes { get; set; }
     }
 
     public class ScopeViewModel
     {
-        public ScopeViewModel(Scope scope, bool check)
+        public ScopeViewModel(IdentityResource scope, bool check)
         {
             Name = scope.Name;
             DisplayName = scope.DisplayName;
