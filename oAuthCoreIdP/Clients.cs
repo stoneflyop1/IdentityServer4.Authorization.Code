@@ -19,7 +19,7 @@ namespace oAuthCoreIdP
                     ClientSecrets = new List<Secret>{ new Secret { Value = "Ywv14txfGNajhsd7Vues48H0R" } }, // { secret },
                     Enabled = true,
                     AllowedGrantTypes = new List<string> { "authorization_code" }, //DELTA //IdentityServer3 wanted Flow = Flows.AuthorizationCode,
-                    RequireConsent = true,
+                    RequireConsent = false, //https://stackoverflow.com/questions/29784610/identityserver3-bypassing-the-consents-screen
                     AllowRememberConsent = false,
                     RedirectUris =
                       new List<string> {
