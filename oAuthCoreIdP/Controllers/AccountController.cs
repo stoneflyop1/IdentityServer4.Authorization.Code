@@ -93,13 +93,13 @@ namespace IdentityServer4.Quickstart.UI.Controllers
                         };
                     };
 
-                    var claim = new Claim(ClaimTypes.NameIdentifier, user.Username);
+                    var nameClaim = new Claim(ClaimTypes.NameIdentifier, user.Username);
                     var sub = new Claim("sub", user.SubjectId);
                     var name = new Claim(ClaimTypes.Name, user.Username);
 
-                    //var identity = new ClaimsIdentity(new[] { claim, sub, name, new Claim("name", user.Username) });
+                    var claims = new[] { nameClaim };
 
-                    await HttpContext.Authentication.SignInAsync(user.SubjectId, user.Username, props, new Claim[] { claim, sub, name, new Claim("name", user.Username) }); //(Startup.AuthScheme, new ClaimsPrincipal(identity), props);
+                    await HttpContext.Authentication.SignInAsync(user.SubjectId, user.Username, props, claims); //(Startup.AuthScheme, new ClaimsPrincipal(identity), props);
 
                     // make sure the returnUrl is still valid, and if yes - redirect back to authorize endpoint
                     if (_interaction.IsValidReturnUrl(model.ReturnUrl))
@@ -272,7 +272,7 @@ namespace IdentityServer4.Quickstart.UI.Controllers
 
             var additionalClaims = new List<Claim>();
             additionalClaims.Add(new Claim(ClaimTypes.Name, user.Username));
-            additionalClaims.Add(new Claim("sub", user.SubjectId));
+            //additionalClaims.Add(new Claim("sub", user.SubjectId));
             // if the external system sent a session id claim, copy it over
             var sid = claims.FirstOrDefault(x => x.Type == JwtClaimTypes.SessionId);
             if (sid != null)
@@ -283,7 +283,7 @@ namespace IdentityServer4.Quickstart.UI.Controllers
             var identity = new ClaimsIdentity(additionalClaims);
 
             // issue authentication cookie for user
-            await HttpContext.Authentication.SignInAsync(Startup.AuthScheme, new ClaimsPrincipal(identity));
+            await HttpContext.Authentication.SignInAsync(user.SubjectId, user.Username, provider, additionalClaims.ToArray());
 
             // delete temporary cookie used during external authentication
             await HttpContext.Authentication.SignOutAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme);
