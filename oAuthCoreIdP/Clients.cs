@@ -23,7 +23,8 @@ namespace oAuthCoreIdP
                     AllowRememberConsent = false,
                     RedirectUris =
                       new List<string> {
-                           "http://test.dbworld.cn/authentication/MFiles.AuthenticationProviders.OAuth/read"
+                           "http://test.dbworld.cn/authentication/MFiles.AuthenticationProviders.OAuth/read",
+                           "http://test.dbworld.cn"
                       },
                     PostLogoutRedirectUris =
                       new List<string> {"http://test.dbworld.cn/"},
