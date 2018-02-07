@@ -15,15 +15,30 @@ using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin;
 using IdentityServer3.Core.Services;
 using IdentityServer3.Core.Services.Default;
+using Serilog;
+using IdentityServer3.Core.Models;
+using IdentityServer3.Core.Validation;
 
 [assembly: OwinStartup(typeof(oAuthCoreIdP.Startup))]
 
 namespace oAuthCoreIdP
 {
+    public class AllSecretValidator : ISecretValidator
+    {
+        public Task<SecretValidationResult> ValidateAsync(IEnumerable<Secret> secrets, ParsedSecret parsedSecret)
+        {
+            return Task.FromResult(new SecretValidationResult { Success = true });
+        }
+    }
     public class Startup
     {
+        
         public void Configuration(IAppBuilder app)
         {
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.Trace()
+                .CreateLogger();
             // todo: replace with serilog
             //LogProvider.SetCurrentLogProvider(new DiagnosticsTraceLogProvider());
 
@@ -33,6 +48,11 @@ namespace oAuthCoreIdP
                                 .UseInMemoryUsers(Users.Get())
                                 .UseInMemoryClients(Clients.Get())
                                 .UseInMemoryScopes(Scopes.Get());
+            var validators = new List<Registration<ISecretValidator>>
+            {
+                new Registration<ISecretValidator, AllSecretValidator>()
+            };
+            fac.SecretValidators = validators;
 
             app.UseIdentityServer(new IdentityServerOptions
             {

@@ -17,7 +17,7 @@ namespace oAuthCoreIdP
                     Name = "api",
                     DisplayName = "api scope",
                     Required = true, 
-                    //Type = ScopeType.Resource,
+                    Type = ScopeType.Resource,
                     Emphasize = false,
                     Claims = new List<ScopeClaim>
                     {
