@@ -17,10 +17,10 @@ namespace oAuthOidcOwinClient.Controllers
     {
         //Values that might differ on our side
         private const string clientBaseUri = @"http://localhost:5436";
-        private const string validIssuer = "http://localhost:5000"; //"SomeSecureCompany";
+        private const string validIssuer = idPServerBaseUri; //"SomeSecureCompany";
 
         //IdentityServer4
-        private const string idPServerBaseUri = @"http://localhost:5000";
+        private const string idPServerBaseUri = @"http://localhost:56783"; // @"http://localhost:5000";
         private const string idPServerAuthUri = idPServerBaseUri + @"/connect/authorize";
         private const string idPServerTokenUriFragment = @"connect/token";
         private const string idPServerEndSessionUri = idPServerBaseUri + @"/connect/endsession";
@@ -29,7 +29,7 @@ namespace oAuthOidcOwinClient.Controllers
         private const string redirectUri = clientBaseUri + @"/account/oAuth2";
         private const string clientId = "authorizationCodeClient2";
         private const string clientSecret = "mysecret";
-        private const string audience = "http://localhost:5000/resources"; //"SomeSecureCompany/resources";
+        private const string audience = idPServerBaseUri+"/resources"; //"SomeSecureCompany/resources";
         private const string scope = "api";
         private const string response_type = "code";
         private const string grantType = "authorization_code";
