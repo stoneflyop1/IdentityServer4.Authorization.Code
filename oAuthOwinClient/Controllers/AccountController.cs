@@ -20,7 +20,7 @@ namespace oAuthOidcOwinClient.Controllers
         private const string validIssuer = idPServerBaseUri; //"SomeSecureCompany";
 
         //IdentityServer4
-        private const string idPServerBaseUri = @"http://localhost:56783"; // @"http://localhost:5000";
+        private const string idPServerBaseUri =  @"http://localhost:5000"; //@"http://localhost:56783"; //
         private const string idPServerAuthUri = idPServerBaseUri + @"/connect/authorize";
         private const string idPServerTokenUriFragment = @"connect/token";
         private const string idPServerEndSessionUri = idPServerBaseUri + @"/connect/endsession";

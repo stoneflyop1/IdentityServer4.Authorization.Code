@@ -3,17 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using IdentityServer4.Configuration;
-using Microsoft.Extensions.PlatformAbstractions;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using IdentityServer4.Validation;
 using IdentityServer4.Models;
 using IdentityServer4;
+using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.PlatformAbstractions;
 
 namespace oAuthCoreIdP
 {
@@ -26,6 +25,14 @@ namespace oAuthCoreIdP
     }
     public class Startup
     {
+
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
+
         public static readonly string AuthScheme = IdentityServerConstants.DefaultCookieAuthenticationScheme; //"bearer";
 
         public void ConfigureServices(IServiceCollection services)
@@ -50,7 +57,7 @@ namespace oAuthCoreIdP
             services.AddMvc();
         }
 
-        public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             loggerFactory.AddConsole(LogLevel.Debug);
             app.UseDeveloperExceptionPage();

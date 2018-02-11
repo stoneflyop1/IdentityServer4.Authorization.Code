@@ -5,7 +5,6 @@
 using IdentityModel;
 using IdentityServer4.Quickstart.UI.Models;
 using IdentityServer4.Services;
-using Microsoft.AspNetCore.Http.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -15,9 +14,9 @@ using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using IdentityServer4.Models;
 using IdentityServer4.Stores;
-using oAuthCoreIdP.Services;
 using IdentityServer4.Test;
-using oAuthCoreIdP;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authentication;
 
 namespace IdentityServer4.Quickstart.UI.Controllers
 {
@@ -31,15 +30,17 @@ namespace IdentityServer4.Quickstart.UI.Controllers
         private readonly TestUserStore _loginService;
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IClientStore _clientStore;
+        private readonly IAuthenticationSchemeProvider _schemeProvider;
 
         public AccountController(
-            TestUserStore loginService,
+            TestUserStore loginService, IAuthenticationSchemeProvider schemeProvider,
             IIdentityServerInteractionService interaction,
             IClientStore clientStore)
         {
             _loginService = loginService;
             _interaction = interaction;
             _clientStore = clientStore;
+            _schemeProvider = schemeProvider;
         }
 
         /// <summary>
@@ -99,7 +100,7 @@ namespace IdentityServer4.Quickstart.UI.Controllers
 
                     var claims = new[] { nameClaim };
 
-                    await HttpContext.Authentication.SignInAsync(user.SubjectId, user.Username, props, claims); //(Startup.AuthScheme, new ClaimsPrincipal(identity), props);
+                    await HttpContext.SignInAsync(user.SubjectId, user.Username, props, claims); //(Startup.AuthScheme, new ClaimsPrincipal(identity), props);
 
                     // make sure the returnUrl is still valid, and if yes - redirect back to authorize endpoint
                     if (_interaction.IsValidReturnUrl(model.ReturnUrl))
@@ -120,12 +121,12 @@ namespace IdentityServer4.Quickstart.UI.Controllers
 
         async Task<LoginViewModel> BuildLoginViewModelAsync(string returnUrl, AuthorizationRequest context)
         {
-            var providers = HttpContext.Authentication.GetAuthenticationSchemes()
+            var providers = (await _schemeProvider.GetAllSchemesAsync())
                 .Where(x => x.DisplayName != null)
                 .Select(x => new ExternalProvider
                 {
                     DisplayName = x.DisplayName,
-                    AuthenticationScheme = x.AuthenticationScheme
+                    AuthenticationScheme = x.Name
                 });
 
             var allowLocal = true;
@@ -190,7 +191,7 @@ namespace IdentityServer4.Quickstart.UI.Controllers
         public async Task<IActionResult> Logout(LogoutViewModel model)
         {
             // delete authentication cookie
-            await HttpContext.Authentication.SignOutAsync();
+            await HttpContext.SignOutAsync();
 
             // set this so UI rendering sees an anonymous user
             HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity());
@@ -234,14 +235,13 @@ namespace IdentityServer4.Quickstart.UI.Controllers
         public async Task<IActionResult> ExternalLoginCallback(string returnUrl)
         {
             // read external identity from the temporary cookie
-            var tempUser = await HttpContext.Authentication.AuthenticateAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme);
+            var tempUser = await HttpContext.AuthenticateAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme);
             if (tempUser == null)
             {
                 throw new Exception("External authentication error");
             }
-
             // retrieve claims of the external user
-            var claims = tempUser.Claims.ToList();
+            var claims = ((ClaimsIdentity)tempUser.Principal.Identity).Claims.ToList();
 
             // try to determine the unique id of the external user - the most common claim type for that are the sub claim and the NameIdentifier
             // depending on the external provider, some other claim type might be used
@@ -283,10 +283,10 @@ namespace IdentityServer4.Quickstart.UI.Controllers
             var identity = new ClaimsIdentity(additionalClaims);
 
             // issue authentication cookie for user
-            await HttpContext.Authentication.SignInAsync(user.SubjectId, user.Username, provider, additionalClaims.ToArray());
+            await HttpContext.SignInAsync(user.SubjectId, user.Username, provider, additionalClaims.ToArray());
 
             // delete temporary cookie used during external authentication
-            await HttpContext.Authentication.SignOutAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme);
+            await HttpContext.SignOutAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme);
 
             // validate return URL and redirect back to authorization endpoint
             if (_interaction.IsValidReturnUrl(returnUrl))
